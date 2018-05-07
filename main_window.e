@@ -29,11 +29,15 @@ feature {NONE} -- Initialization
 
 	create_interface_objects
 			-- <Precursor>
+		local
+			l_pixel_format:CAIRO_PIXEL_FORMAT
 		do
 				-- Create main container.
 			create main_container
 			create drawing_area
-			create diagram.make (2000, 2000)
+			create l_pixel_format.make_argb32
+			create surface.make (l_pixel_format, 2000, 2000)
+			create diagram.make_from_image_surface (surface)
 			create diagram_pixel_buffer.make
 			initialize_diagram
 		end
@@ -64,14 +68,26 @@ feature {NONE} -- Initialization
 			-- Initialization of the `diagram'
 		local
 			l_box:DIA_BOX
+			l_font:CAIRO_TOY_FONT_FACE
+			l_text:DIA_TEXT
 		do
 			create l_box
+			diagram.add_element (l_box)
 			l_box.set_x (50)
 			l_box.set_y (50)
 			l_box.set_height (50)
 			l_box.set_width (50)
 			l_box.set_fill_color (1.0, 0.0, 0.0, 0.5)
-			diagram.add_element (l_box)
+			create l_font
+			create l_text.make (l_font)
+			diagram.add_element (l_text)
+			l_text.set_text ("Bonjour")
+			l_text.align_vertical_top
+			l_text.x := 100
+			l_text.y := 100
+			l_text.set_size (50)
+			l_text.set_fill_color (0.0, 1.0, 0.0, 0.5)
+			print("Height= " + l_text.height.out + " , Width= " + l_text.width.out + "%N")
 			redraw_diagram
 		end
 
@@ -113,6 +129,9 @@ feature {NONE} -- Implementation
 	drawing_area:EV_DRAWING_AREA
 			-- Widget to draw the `diagram'
 
+	surface:CAIRO_SURFACE_IMAGE
+			-- The {CAIRO_SURFACE} to draw the `diagram'
+
 	diagram:DIA_DIAGRAM
 			-- The diagram controler
 
@@ -127,15 +146,9 @@ feature {NONE} -- Implementation
 
 	redraw_diagram
 			-- Redraw the `diagram' to the `diagram_pixel_buffer'
-		local
-			l_surface:CAIRO_SURFACE_IMAGE
-			l_pixel_format:CAIRO_PIXEL_FORMAT
 		do
-			create l_pixel_format.make_argb32
-			create l_surface.make (l_pixel_format, diagram.width, diagram.height)
-			diagram.draw (l_surface)
-			l_surface.show_page
-			create diagram_pixel_buffer.make_from_cairo_surface (l_surface)
+			diagram.draw
+			create diagram_pixel_buffer.make_from_cairo_surface (surface)
 		end
 
 	main_container: EV_VERTICAL_BOX

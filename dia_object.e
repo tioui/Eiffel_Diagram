@@ -27,17 +27,18 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	draw(a_context:CAIRO_CONTEXT)
+	draw
 			-- Draw `Current' on `a_context'
 		do
-			a_context.set_line_width (stroke_size)
-			a_context.set_dashes (internal_stroke_pattern, stroke_pattern_offset)
-
-			draw_stroke(a_context)
-			a_context.set_source_rgba (fill_color.red, fill_color.green, fill_color.blue, fill_color.alpha)
-			a_context.fill_preserve
-			a_context.set_source_rgba (stroke_color.red, stroke_color.green, stroke_color.blue, stroke_color.alpha)
-			a_context.stroke
+			if attached diagram as la_diagram then
+				la_diagram.context.set_line_width (stroke_size)
+				la_diagram.context.set_dashes (internal_stroke_pattern, stroke_pattern_offset)
+				draw_stroke(la_diagram.context)
+				la_diagram.context.set_source_rgba (fill_color.red, fill_color.green, fill_color.blue, fill_color.alpha)
+				la_diagram.context.fill_preserve
+				la_diagram.context.set_source_rgba (stroke_color.red, stroke_color.green, stroke_color.blue, stroke_color.alpha)
+				la_diagram.context.stroke
+			end
 		end
 
 	stroke_color:TUPLE[red, green, blue, alpha:REAL_64]
@@ -123,6 +124,9 @@ feature -- Access
 			Is_Assign: stroke_pattern_offset ~ a_pattern_offset
 		end
 
+	diagram:detachable DIA_DIAGRAM
+			-- The {DIA_DIAGRAM} containing `Current'
+
 feature {NONE} -- Implementation
 
 	draw_stroke(a_context:CAIRO_CONTEXT)
@@ -132,5 +136,14 @@ feature {NONE} -- Implementation
 
 	internal_stroke_pattern:ARRAY[REAL_64]
 			-- The internal values of `stroke_pattern'
+
+
+feature {DIA_DIAGRAM} -- Implementation
+
+	set_diagram(a_diagram:detachable DIA_DIAGRAM)
+			-- Assign `diagram' with the value of `a_diagram'
+		do
+			diagram := a_diagram
+		end
 
 end

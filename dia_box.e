@@ -9,6 +9,10 @@ class
 
 inherit
 	DIA_ELEMENT
+	DIA_MUTABLE_DIMENSIONABLE
+		undefine
+			default_create
+		end
 
 feature {NONE} -- Implementation
 

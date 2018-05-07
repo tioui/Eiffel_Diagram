@@ -13,20 +13,42 @@ inherit
 			fill_color as background_color,
 			set_fill_color as set_background_color
 		end
-	DIA_DIMENSIONABLE
+	DIA_MUTABLE_DIMENSIONABLE
 		undefine
 			default_create
 		end
 
 create
-	make
+	make,
+	make_from_image_surface
 
 feature {NONE} -- Initialization
 
-	make(a_width, a_height:INTEGER)
-			-- Initialization of `Current' using `a_width' as `width' and `a_height' as `height'
+	make(a_surface:CAIRO_SURFACE; a_width, a_height:INTEGER)
+			-- Initialization of `Current' using `a_surface' to initialize `context', `a_width' as `width' and `a_height' as `height'
+		do
+			make_with_context(create {CAIRO_CONTEXT}.make (a_surface), a_width, a_height)
+		ensure
+			Surface_Assign: context.surface ~ a_surface
+			Height_Assign: width ~ a_width
+			Height_Assign: height ~ a_height
+		end
+
+	make_from_image_surface(a_surface:CAIRO_SURFACE_IMAGE)
+			-- Initialization of `Current' using `a_surface' to initialize `context', `width' and `height'
+		do
+			make(a_surface, a_surface.width, a_surface.height)
+		ensure
+			Surface_Assign: context.surface ~ a_surface
+			Height_Assign: width ~ a_surface.width
+			Height_Assign: height ~ a_surface.height
+		end
+
+	make_with_context(a_context:CAIRO_CONTEXT; a_width, a_height:INTEGER)
+			-- Initialization of `Current' using `a_context' as `context', `a_width' as `width' and `a_height' as `height'
 		do
 			default_create
+			context := a_context
 			set_width (a_width)
 			set_height (a_height)
 			create {LINKED_LIST[DIA_ELEMENT]} elements_external.make
@@ -35,23 +57,22 @@ feature {NONE} -- Initialization
 			links_external.compare_objects
 			set_background_color (1.0, 1.0, 1.0, 1.0)
 		ensure
+			Context_Assign: context ~ a_context
 			Height_Assign: width ~ a_width
 			Height_Assign: height ~ a_height
 		end
 
 feature -- Access
 
-	draw(a_surface:CAIRO_SURFACE)
+	draw
 			-- Draw `Current' on `a_surface'
-		local
-			l_context:CAIRO_CONTEXT
 		do
-			create l_context.make (a_surface)
-			l_context.set_source_rgba (background_color.red, background_color.green, background_color.blue, background_color.alpha)
-			l_context.paint
+			context.set_source_rgba (background_color.red, background_color.green, background_color.blue, background_color.alpha)
+			context.paint
 			across elements_external as la_elements loop
-				la_elements.item.draw (l_context)
+				la_elements.item.draw
 			end
+			context.show_page
 		end
 
 	add_element(a_element:DIA_ELEMENT)
@@ -59,6 +80,7 @@ feature -- Access
 		require
 			Element_Not_Already_Added: not elements.has (a_element)
 		do
+			a_element.set_diagram(Current)
 			elements_external.extend (a_element)
 		ensure
 			Is_Added: elements.last ~ a_element
@@ -74,6 +96,17 @@ feature -- Access
 			add_element (a_element)
 		ensure
 			Is_Added: elements.last ~ a_element
+		end
+
+	remove(a_element:DIA_ELEMENT)
+			-- Remove `a_element' from `Current'
+		require
+			Element_Exists: elements.has (a_element)
+		do
+			a_element.set_diagram (Void)
+			elements_external.prune_all (a_element)
+		ensure
+			Not_Exists: not elements.has (a_element)
 		end
 
 	elements:LIST[DIA_ELEMENT]
@@ -92,6 +125,9 @@ feature -- Access
 			Result.append (links_external)
 		end
 
+	context:CAIRO_CONTEXT
+			-- The {CAIRO_CONTEXT} of `Current'
+
 feature {NONE} -- Implementation
 
 
@@ -103,4 +139,5 @@ feature {NONE} -- Implementation
 
 invariant
 	Elements_Unique: across elements as la_elements all elements.occurrences (la_elements.item) = 1 end
+	Elements_Diagram_valid: across elements as la_elements all la_elements.item.diagram ~ Current end
 end
