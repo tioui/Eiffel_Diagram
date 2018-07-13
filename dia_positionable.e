@@ -7,28 +7,16 @@ note
 deferred class
 	DIA_POSITIONABLE
 
-
 feature -- Access
 
-	x:INTEGER assign set_x
+	x:INTEGER
 			-- Horizontal position of `Current'
-
-	set_x(a_x:like x)
-			-- Assign `a_x' to `x'
-		do
-			x := a_x
-		ensure
-			Is_Assign: x ~ a_x
+		deferred
 		end
 
-	y:INTEGER assign set_y
+	y:INTEGER
 			-- Vertical position of `Current'
-
-	set_y(a_y:like y)
-			-- Assign `a_y' to `y'
-		do
-			y := a_y
-		ensure
-			Is_Assign: y ~ a_y
+		deferred
 		end
+		
 end

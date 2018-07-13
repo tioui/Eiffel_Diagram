@@ -64,19 +64,33 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
+	has_error:BOOLEAN
+			-- An error occured on the last operation
+		do
+			Result :=
+					across elements_external as la_elements some la_elements.item.has_error end
+				or
+					across links_external as la_links some la_links.item.has_error end
+		end
+
 	draw
 			-- Draw `Current' on `a_surface'
+		require
+			No_Error: not has_error
 		do
 			context.set_source_rgba (background_color.red, background_color.green, background_color.blue, background_color.alpha)
 			context.paint
 			across elements_external as la_elements loop
 				la_elements.item.draw
 			end
+			across links_external as la_links loop
+				la_links.item.draw
+			end
 			context.show_page
 		end
 
 	add_element(a_element:DIA_ELEMENT)
-			-- Add `a_element' in `element'
+			-- Add `a_element' in `elements'
 		require
 			Element_Not_Already_Added: not elements.has (a_element)
 		do
@@ -98,8 +112,8 @@ feature -- Access
 			Is_Added: elements.last ~ a_element
 		end
 
-	remove(a_element:DIA_ELEMENT)
-			-- Remove `a_element' from `Current'
+	remove_element(a_element:DIA_ELEMENT)
+			-- Remove `a_element' from `elements'
 		require
 			Element_Exists: elements.has (a_element)
 		do
@@ -115,6 +129,29 @@ feature -- Access
 			create {ARRAYED_LIST[DIA_ELEMENT]} Result.make (elements_external.count)
 			Result.compare_objects
 			Result.append (elements_external)
+		end
+
+	add_link(a_link:DIA_LINK)
+			-- Add `a_link' in `links'
+		require
+			Link_Not_Already_Added: not links.has (a_link)
+		do
+			a_link.set_diagram(Current)
+			links_external.extend (a_link)
+		ensure
+			Is_Added: links.last ~ a_link
+			Is_unique: links.occurrences (a_link) = 1
+		end
+
+	remove_links(a_link:DIA_LINK)
+			-- Remove `a_links' from `links'
+		require
+			Link_Exists: links.has (a_link)
+		do
+			a_link.set_diagram(Void)
+			links_external.prune_all (a_link)
+		ensure
+			Not_Exists: not links.has (a_link)
 		end
 
 	links:LIST[DIA_LINK]

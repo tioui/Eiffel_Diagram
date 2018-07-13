@@ -68,8 +68,9 @@ feature {NONE} -- Initialization
 			-- Initialization of the `diagram'
 		local
 			l_box:DIA_BOX
-			l_font:CAIRO_TOY_FONT_FACE
 			l_text:DIA_TEXT
+			l_text_box:DIA_TEXT_BOX
+			l_link:DIA_LINK
 		do
 			create l_box
 			diagram.add_element (l_box)
@@ -78,16 +79,28 @@ feature {NONE} -- Initialization
 			l_box.set_height (50)
 			l_box.set_width (50)
 			l_box.set_fill_color (1.0, 0.0, 0.0, 0.5)
-			create l_font
-			create l_text.make (l_font)
+			create l_text.make ("Sans 20")
 			diagram.add_element (l_text)
-			l_text.set_text ("Bonjour")
-			l_text.align_vertical_top
+			l_text.set_text ("Bonjour%NMonde")
+			l_text.align_vertical_center
+			l_text.align_horizontal_right
+			l_text.align_text_center
 			l_text.x := 100
 			l_text.y := 100
 			l_text.set_size (50)
 			l_text.set_fill_color (0.0, 1.0, 0.0, 0.5)
-			print("Height= " + l_text.height.out + " , Width= " + l_text.width.out + "%N")
+			create l_text_box.make ("Sans 15")
+			diagram.add_element (l_text_box)
+			l_text_box.x := 150
+			l_text_box.y := 200
+			l_text_box.width := 200
+			l_text_box.minimum_height := 100
+			l_text_box.text.set_text ("Eum voluptatem iure odio exercitationem aut blanditiis cupiditate consequatur.%N%NVeniam omnis sed at et sapiente omnis commodi.")
+
+			create l_link.make(l_box, l_text_box)
+			l_link.set_stroke_color (1, 0, 0, 1)
+			l_link.set_stroke_size (10)
+			diagram.add_link (l_link)
 			redraw_diagram
 		end
 

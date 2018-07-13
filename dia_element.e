@@ -13,7 +13,7 @@ inherit
 		undefine
 			default_create
 		end
-	DIA_POSITIONABLE
+	DIA_MUTABLE_POSITIONABLE
 		undefine
 			default_create
 		end

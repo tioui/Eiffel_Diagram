@@ -18,6 +18,7 @@ feature {NONE} -- Initialization
 	default_create
 			-- Initialization of `Current'
 		do
+			has_error := False
 			Precursor
 			internal_stroke_pattern := <<>>
 			stroke_size := 1
@@ -27,8 +28,13 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
+	has_error:BOOLEAN
+			-- An error occured on the last operation
+
 	draw
 			-- Draw `Current' on `a_context'
+		require
+			Valid: is_valid
 		do
 			if attached diagram as la_diagram then
 				la_diagram.context.set_line_width (stroke_size)
@@ -126,6 +132,12 @@ feature -- Access
 
 	diagram:detachable DIA_DIAGRAM
 			-- The {DIA_DIAGRAM} containing `Current'
+
+	is_valid:BOOLEAN
+			-- `Current' can be used
+		do
+			Result := not has_error and attached diagram
+		end
 
 feature {NONE} -- Implementation
 

@@ -22,6 +22,8 @@
 		<library name="eiffel_cairo" location="$ISE_LIBRARY\contrib\library\cairo\core\eiffel_cairo.ecf"/>
 		<library name="eiffel_cairo_freetype" location="$ISE_LIBRARY\contrib\library\cairo\freetype\eiffel_cairo_freetype.ecf"/>
 		<library name="eiffel_cairo_vision2" location="$ISE_LIBRARY\contrib\library\cairo\vision2\eiffel_cairo_vision2.ecf"/>
+		<library name="eiffel_pango" location="$ISE_LIBRARY\contrib\library\pango\core\eiffel_pango.ecf"/>
+		<library name="eiffel_pango_cairo" location="$ISE_LIBRARY\contrib\library\pango\cairo\eiffel_pango_cairo.ecf"/>
 		<library name="vision2" location="$ISE_LIBRARY\library\vision2\vision2.ecf"/>
 		<cluster name="root_cluster" location=".\" recursive="true"/>
 	</target>
