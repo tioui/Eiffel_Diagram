@@ -37,6 +37,7 @@ feature -- Access
 			Valid: is_valid
 		do
 			if attached diagram as la_diagram then
+				la_diagram.context.save_state
 				la_diagram.context.set_line_width (stroke_size)
 				la_diagram.context.set_dashes (internal_stroke_pattern, stroke_pattern_offset)
 				draw_stroke(la_diagram.context)
@@ -44,6 +45,7 @@ feature -- Access
 				la_diagram.context.fill_preserve
 				la_diagram.context.set_source_rgba (stroke_color.red, stroke_color.green, stroke_color.blue, stroke_color.alpha)
 				la_diagram.context.stroke
+				la_diagram.context.restore_state
 			end
 		end
 
@@ -157,5 +159,27 @@ feature {DIA_DIAGRAM} -- Implementation
 		do
 			diagram := a_diagram
 		end
+
+note
+	copywrite: "Copyright (c) 2018, Louis Marchand"
+	license: "[
+				Permission is hereby granted, free of charge, to any person obtaining a
+				copy of this software and associated documentation files (the "Software"),
+				to deal in the Software without restriction, including without limitation
+				the rights to use, copy, modify, merge, publish, distribute, sublicense,
+				and/or sell copies of the Software, and to permit persons to whom the
+				Software is furnished to do so, subject to the following conditions:
+
+				The above copyright notice and this permission notice shall be included
+				in all copies or substantial portions of the Software.
+
+				THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+				OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+				FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+				THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+				LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+				FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+				DEALINGS IN THE SOFTWARE.
+		]"
 
 end

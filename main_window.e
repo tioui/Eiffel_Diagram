@@ -71,6 +71,7 @@ feature {NONE} -- Initialization
 			l_text:DIA_TEXT
 			l_text_box:DIA_TEXT_BOX
 			l_link:DIA_LINK
+			l_marker:DIA_ARROW_MARKER
 		do
 			create l_box
 			diagram.add_element (l_box)
@@ -101,6 +102,20 @@ feature {NONE} -- Initialization
 			l_link.set_stroke_color (1, 0, 0, 1)
 			l_link.set_stroke_size (10)
 			diagram.add_link (l_link)
+
+			create l_marker.make (20, 30)
+			l_link.set_end_marker (l_marker)
+			create l_marker.make (20, 30)
+			l_link.set_start_marker (l_marker)
+
+			create l_box
+			l_box.x := 150
+			l_box.y := 50
+			l_box.width := 50
+			l_box.height := 50
+			diagram.add_element (l_box)
+
+
 			redraw_diagram
 		end
 

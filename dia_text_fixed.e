@@ -1,8 +1,11 @@
 note
-	description: "Summary description for {DIA_TEXT_FIXED}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	description: "[
+					A text that can be writen in a {DIA_DIAGRAM} that canot change it's position or alignment
+					Should be used as an ancestor for {DIA_ELEMENT} that use text.
+				]"
+	author: "Louis Marchand"
+	date: "Tue, 24 Jul 2018 13:45:38 +0000"
+	revision: "0.1"
 
 class
 	DIA_TEXT_FIXED
@@ -16,7 +19,7 @@ inherit
 			set_diagram, is_valid
 		end
 
-create
+create {DIA_ELEMENT}
 	make
 
 feature {NONE} -- Initialization
@@ -408,5 +411,27 @@ invariant
 						(is_align_text_right implies (not is_align_text_left and not is_align_text_center and not is_align_text_justified)) and
 						(is_align_text_justified implies (not is_align_text_left and not is_align_text_center and not is_align_text_right))
 					)
+
+note
+	copywrite: "Copyright (c) 2018, Louis Marchand"
+	license: "[
+				Permission is hereby granted, free of charge, to any person obtaining a
+				copy of this software and associated documentation files (the "Software"),
+				to deal in the Software without restriction, including without limitation
+				the rights to use, copy, modify, merge, publish, distribute, sublicense,
+				and/or sell copies of the Software, and to permit persons to whom the
+				Software is furnished to do so, subject to the following conditions:
+
+				The above copyright notice and this permission notice shall be included
+				in all copies or substantial portions of the Software.
+
+				THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+				OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+				FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+				THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+				LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+				FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+				DEALINGS IN THE SOFTWARE.
+		]"
 
 end

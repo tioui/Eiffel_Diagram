@@ -10,6 +10,10 @@ class
 inherit
 	DIA_OBJECT
 		redefine
+			default_create, draw
+		end
+	DOUBLE_MATH
+		redefine
 			default_create
 		end
 
@@ -21,7 +25,7 @@ feature {NONE} -- Initialization
 	default_create
 			-- Initialization of `Current'
 		do
-			Precursor
+			Precursor {DIA_OBJECT}
 			create {LINKED_LIST[DIA_ANCHOR_POINT]}corner_anchors.make
 			create {DIA_ANCHOR_POINT}start_anchor.make (0,0)
 			create {DIA_ANCHOR_POINT}end_anchor.make (0,0)
@@ -41,12 +45,30 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
+	draw
+			-- <Precursor>
+		do
+			Precursor
+			draw_marker(start_marker)
+			draw_marker(end_marker)
+		end
+
 	start_marker:detachable DIA_MARKER assign set_start_marker
 			-- The {DIA_MARKER} to put at the start of `Current'
 
 	set_start_marker(a_marker:detachable DIA_MARKER)
 			-- Assign `start_marker' with the value of `a_marker'
+		local
+			l_start:TUPLE[x, y:INTEGER]
 		do
+			if attached a_marker as la_marker then
+				l_start := after_start_position
+				la_marker.set_link (Current, True, l_start.x, l_start.y, start_position.x, start_position.y)
+			else
+				if attached start_marker as la_marker then
+					la_marker.unset_link
+				end
+			end
 			start_marker := a_marker
 		ensure
 			Is_Assign: start_marker ~ a_marker
@@ -85,6 +107,21 @@ feature -- Access
 			Result := start_anchor.anchor_point (l_x, l_y)
 		end
 
+	start_position_before_marker:TUPLE[x, y:INTEGER]
+			-- The `start_position' when considaring the `start_marker'
+		local
+			l_gap:TUPLE[x, y:REAL_64]
+			l_start_position:TUPLE[x, y:INTEGER]
+		do
+			if attached start_marker as la_marker then
+				l_start_position := start_position
+				l_gap := gap_dimension(la_marker.gap, l_start_position, after_start_position)
+				Result := [(l_start_position.x - l_gap.x).rounded, (l_start_position.y - l_gap.y).rounded]
+			else
+				Result := start_position
+			end
+		end
+
 
 
 	end_marker:detachable DIA_MARKER assign set_end_marker
@@ -92,7 +129,17 @@ feature -- Access
 
 	set_end_marker(a_marker:detachable DIA_MARKER)
 			-- Assign `end_marker' with the value of `a_marker'
+		local
+			l_start:TUPLE[x, y:INTEGER]
 		do
+			if attached a_marker as la_marker then
+				l_start := before_end_position
+				la_marker.set_link (Current, False, l_start.x, l_start.y, end_position.x, end_position.y)
+			else
+				if attached end_marker as la_marker then
+					la_marker.unset_link
+				end
+			end
 			end_marker := a_marker
 		ensure
 			Is_Assign: end_marker ~ a_marker
@@ -132,6 +179,21 @@ feature -- Access
 			Result := end_anchor.anchor_point (l_x, l_y)
 		end
 
+	end_position_before_marker:TUPLE[x, y:INTEGER]
+			-- The `end_position' when considaring the `end_marker'
+		local
+			l_gap:TUPLE[x, y:REAL_64]
+			l_end_position:TUPLE[x, y:INTEGER]
+		do
+			if attached start_marker as la_marker then
+				l_end_position := end_position
+				l_gap := gap_dimension(la_marker.gap, l_end_position, before_end_position)
+				Result := [(l_end_position.x - l_gap.x).rounded, (l_end_position.y - l_gap.y).rounded]
+			else
+				Result := start_position
+			end
+		end
+
 	add_corner(a_x, a_y:INTEGER)
 			-- Add a corner at `a_x',`a_y' to the end of `corner_anchors'
 		do
@@ -145,20 +207,86 @@ feature -- Access
 
 feature {NONE} -- Implementation
 
+	gap_dimension(a_gap:REAL_64; a_position, a_before_position:TUPLE[x, y:INTEGER]):TUPLE[x, y:REAL_64]
+			-- The dimension of the gap of length `a_gap'
+		local
+			l_hypotenuse:REAL_64
+			l_x, l_y:INTEGER
+		do
+			l_x := a_position.x - a_before_position.x
+			l_y := a_position.y - a_before_position.y
+			l_hypotenuse := sqrt (l_x^2 + l_y^2)
+			Result := [(l_x / l_hypotenuse) * a_gap, (l_y / l_hypotenuse) * a_gap]
+		end
+
+	after_start_position:TUPLE[x, y:INTEGER]
+			-- The position of the second point (corner or anchor) of `Current'
+		do
+			if corner_anchors.is_empty then
+				Result := end_position
+			else
+				Result := [corner_anchors.last.x, corner_anchors.last.y]
+			end
+		end
+
+	before_end_position:TUPLE[x, y:INTEGER]
+			-- The position of the second point (corner or anchor) before the end of `Current'
+		do
+			if corner_anchors.is_empty then
+				Result := start_position
+			else
+				Result := [corner_anchors.first.x, corner_anchors.first.y]
+			end
+		end
+
 	draw_stroke(a_context:CAIRO_CONTEXT)
 			-- <Precursor>
 		local
 			l_position:TUPLE[x, y:INTEGER]
 		do
-			l_position := start_position
+			l_position := start_position_before_marker
 			a_context.move_to (l_position.x, l_position.y)
 			across
 				corner_anchors as la_corners
 			loop
 				a_context.line_to (la_corners.item.x, la_corners.item.y)
 			end
-			l_position := end_position
+			l_position := end_position_before_marker
 			a_context.line_to (l_position.x, l_position.y)
 		end
+
+	draw_marker(a_marker:detachable DIA_MARKER)
+			-- draw `a_marker' if it exists
+		do
+
+			if attached a_marker as la_marker then
+				if not attached la_marker.diagram then
+					la_marker.set_diagram (diagram)
+				end
+				la_marker.draw
+			end
+		end
+
+note
+	copywrite: "Copyright (c) 2018, Louis Marchand"
+	license: "[
+				Permission is hereby granted, free of charge, to any person obtaining a
+				copy of this software and associated documentation files (the "Software"),
+				to deal in the Software without restriction, including without limitation
+				the rights to use, copy, modify, merge, publish, distribute, sublicense,
+				and/or sell copies of the Software, and to permit persons to whom the
+				Software is furnished to do so, subject to the following conditions:
+
+				The above copyright notice and this permission notice shall be included
+				in all copies or substantial portions of the Software.
+
+				THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+				OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+				FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+				THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+				LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+				FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+				DEALINGS IN THE SOFTWARE.
+		]"
 
 end

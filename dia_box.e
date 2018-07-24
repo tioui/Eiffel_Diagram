@@ -29,14 +29,23 @@ feature {DIA_LINK} -- Implementation
 
 	anchor_point(a_source_x, a_source_y:INTEGER):TUPLE[x, y:INTEGER]
 			-- <Precursor>
-			-- ToDo
+		do
+			Result := anchor_point_with_height(a_source_x, a_source_y, height)
+		end
+
+feature {NONE} -- Implementation
+
+	anchor_point_with_height(a_source_x, a_source_y, a_height:INTEGER):TUPLE[x, y:INTEGER]
+			-- The position of the point where the DIA_LINK should end
+			-- consideraing that the DIA_LINK start at `a_source_x`, `a_source_y`.
+			-- Used `a_height' as `height'
 		local
-			l_distance, l_new_distance:REAL_64
+			l_distance:REAL_64
 			l_source:TUPLE[x, y:REAL_64]
 			l_result:TUPLE[point:detachable TUPLE[x, y:REAL_64]; distance:REAL_64]
 			l_center:TUPLE[x, y:INTEGER]
 		do
-			l_center := [x + (width // 2), y + (height // 2)]
+			l_center := [x + (width // 2), y + (a_height // 2)]
 			l_source := [a_source_x.to_double, a_source_y.to_double]
 			l_distance := {REAL_64}.positive_infinity
 			l_result := [Void, {REAL_64}.positive_infinity]
@@ -47,17 +56,17 @@ feature {DIA_LINK} -- Implementation
 							)
 			l_result := validate_point(
 								l_result,
-								find_intersect([x, y, x, y + height], [a_source_x, a_source_y, l_center.x, l_center.y]),
+								find_intersect([x, y, x, y + a_height], [a_source_x, a_source_y, l_center.x, l_center.y]),
 								l_source
 							)
 			l_result := validate_point(
 								l_result,
-								find_intersect([x + width, y, x + width, y + height], [a_source_x, a_source_y, l_center.x, l_center.y]),
+								find_intersect([x + width, y, x + width, y + a_height], [a_source_x, a_source_y, l_center.x, l_center.y]),
 								l_source
 							)
 			l_result := validate_point(
 								l_result,
-								find_intersect([x, y + height, x + width, y + height], [a_source_x, a_source_y, l_center.x, l_center.y]),
+								find_intersect([x, y + a_height, x + width, y + a_height], [a_source_x, a_source_y, l_center.x, l_center.y]),
 								l_source
 							)
 			if attached l_result.point as la_point then
@@ -67,13 +76,13 @@ feature {DIA_LINK} -- Implementation
 			end
 		end
 
-feature {NONE} -- Implementation
-
 	validate_point(
 				a_old_point: TUPLE[point:detachable TUPLE[x, y:REAL_64]; distance:REAL_64];
 				a_new_point:detachable TUPLE[x, y:REAL_64];
 				a_source:TUPLE[x, y:REAL_64]
 			):TUPLE[old_point:detachable TUPLE[x, y:REAL_64]; distance:REAL_64]
+				-- Find the shorter distance between `a_old_point' and `a_source' or between
+				-- `a_new_point' and `a_source'. Return the point and the distance
 		local
 			l_distance:REAL_64
 		do
@@ -88,6 +97,7 @@ feature {NONE} -- Implementation
 		end
 
 	find_intersect(a_line_1, a_line_2:TUPLE[x1, y1, x2, y2:INTEGER]):detachable TUPLE[x, y:REAL_64]
+			-- Find the intersection between the two line segments `a_line_1' and `a_line_2', if any.
 		local
 			l_delta_x_1, l_delta_x_2, l_delta_y_1, l_delta_y_2, l_determinant, l_det_line_1, l_det_line_2, l_x, l_y:REAL_64
 		do
@@ -121,4 +131,26 @@ feature {NONE} -- Implementation
 			a_context.line_to (x, y + height)
 			a_context.line_to (x, y)
 		end
+
+note
+	copywrite: "Copyright (c) 2018, Louis Marchand"
+	license: "[
+				Permission is hereby granted, free of charge, to any person obtaining a
+				copy of this software and associated documentation files (the "Software"),
+				to deal in the Software without restriction, including without limitation
+				the rights to use, copy, modify, merge, publish, distribute, sublicense,
+				and/or sell copies of the Software, and to permit persons to whom the
+				Software is furnished to do so, subject to the following conditions:
+
+				The above copyright notice and this permission notice shall be included
+				in all copies or substantial portions of the Software.
+
+				THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+				OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+				FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+				THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+				LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+				FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+				DEALINGS IN THE SOFTWARE.
+		]"
 end
