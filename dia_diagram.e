@@ -20,7 +20,8 @@ inherit
 
 create
 	make,
-	make_from_image_surface
+	make_from_image_surface,
+	make_with_context
 
 feature {NONE} -- Initialization
 
@@ -48,9 +49,7 @@ feature {NONE} -- Initialization
 			-- Initialization of `Current' using `a_context' as `context', `a_width' as `width' and `a_height' as `height'
 		do
 			default_create
-			context := a_context
-			set_width (a_width)
-			set_height (a_height)
+			set_context(a_context, a_width, a_height)
 			create {LINKED_LIST[DIA_ELEMENT]} elements_external.make
 			create {LINKED_LIST[DIA_LINK]} links_external.make
 			elements_external.compare_objects
@@ -63,6 +62,22 @@ feature {NONE} -- Initialization
 		end
 
 feature -- Access
+
+	set_surface(a_surface:CAIRO_SURFACE_IMAGE)
+			-- Modify `context' by using `a_surface'
+		do
+			set_context(create {CAIRO_CONTEXT}.make (a_surface), a_surface.width, a_surface.height)
+			elements_external.do_all (agent {DIA_ELEMENT}.update_context)
+			links_external.do_all (agent {DIA_LINK}.update_context)
+		end
+
+	set_context(a_context:CAIRO_CONTEXT; a_width, a_height:INTEGER)
+			-- Modify `context' by using `a_context' with dimension `a_width' X `a_height'
+		do
+			context := a_context
+			set_width (a_width)
+			set_height (a_height)
+		end
 
 	has_error:BOOLEAN
 			-- An error occured on the last operation
@@ -78,6 +93,7 @@ feature -- Access
 		require
 			No_Error: not has_error
 		do
+			context.save_state
 			context.set_source_rgba (background_color.red, background_color.green, background_color.blue, background_color.alpha)
 			context.paint
 			across elements_external as la_elements loop
@@ -87,6 +103,7 @@ feature -- Access
 				la_links.item.draw
 			end
 			context.show_page
+			context.restore_state
 		end
 
 	add_element(a_element:DIA_ELEMENT)
@@ -143,7 +160,7 @@ feature -- Access
 			Is_unique: links.occurrences (a_link) = 1
 		end
 
-	remove_links(a_link:DIA_LINK)
+	remove_link(a_link:DIA_LINK)
 			-- Remove `a_links' from `links'
 		require
 			Link_Exists: links.has (a_link)
@@ -177,6 +194,8 @@ feature {NONE} -- Implementation
 invariant
 	Elements_Unique: across elements as la_elements all elements.occurrences (la_elements.item) = 1 end
 	Elements_Diagram_valid: across elements as la_elements all la_elements.item.diagram ~ Current end
+	Links_Unique: across links as la_links all links.occurrences (la_links.item) = 1 end
+	Links_Diagram_valid: across links as la_links all la_links.item.diagram ~ Current end
 
 note
 	copywrite: "Copyright (c) 2018, Louis Marchand"

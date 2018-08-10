@@ -11,13 +11,13 @@
 		</option>
 		<capability>
 			<catcall_detection support="none"/>
-			<concurrency support="scoop" use="scoop"/>
+			<concurrency support="scoop"/>
 			<void_safety support="all"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="eiffel_cairo" location="$ISE_LIBRARY\contrib\library\cairo\core\eiffel_cairo.ecf"/>
 		<library name="eiffel_pango" location="$ISE_LIBRARY\contrib\library\pango\core\eiffel_pango.ecf"/>
 		<library name="eiffel_pango_cairo" location="$ISE_LIBRARY\contrib\library\pango\cairo\eiffel_pango_cairo.ecf"/>
-		<cluster name="Eiffel_Diagram" location=".\" recursive="true"/>
+		<cluster name="eiffel_diagram" location=".\" recursive="true"/>
 	</target>
 </system>

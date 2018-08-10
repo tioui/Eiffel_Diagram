@@ -13,7 +13,7 @@ inherit
 			height as minimum_height,
 			set_height as set_minimum_height
 		redefine
-			draw, set_width, is_valid, set_diagram, draw_stroke, anchor_point
+			draw, set_width, is_valid, set_diagram, draw_stroke, anchor_point, update_context
 		end
 	PANGO_CONSTANTS
 		undefine
@@ -89,6 +89,16 @@ feature {DIA_LINK} -- Implementation
 			-- <Precursor>
 		do
 			Result := anchor_point_with_height(a_source_x, a_source_y, height)
+		end
+
+
+feature {DIA_DIAGRAM} -- Implementation
+
+	update_context
+			-- <Precursor>
+		do
+			Precursor
+			text.update_context
 		end
 
 

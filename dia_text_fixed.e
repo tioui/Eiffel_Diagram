@@ -14,9 +14,10 @@ class
 inherit
 	DIA_ELEMENT
 		export
-			{DIA_TEXT_BOX} set_x, set_y
+			{DIA_TEXT_BOX} set_x, set_y;
+			{DIA_DIAGRAM, DIA_TEXT_BOX} set_diagram
 		redefine
-			set_diagram, is_valid
+			is_valid, update_context
 		end
 
 create {DIA_ELEMENT}
@@ -252,6 +253,7 @@ feature {NONE} -- Implementation
 			l_x, l_y:INTEGER
 		do
 			if attached layout as la_layout then
+				la_layout.set_font_description (font_description)
 				l_x := x
 				if is_align_horizontal_center then
 					l_x := x - (width // 2)
@@ -265,7 +267,7 @@ feature {NONE} -- Implementation
 					l_y :=y - height
 				end
 				a_context.move_to (l_x, l_y)
-				la_layout.update_from_cairo_context (a_context)
+				la_layout.update_context
 				la_layout.show
 			end
 		end
@@ -380,12 +382,15 @@ feature {DIA_DIAGRAM, DIA_TEXT_BOX} -- Implementation
 			Is_Right_Set: is_align_horizontal_right
 		end
 
-	set_diagram(a_diagram:detachable DIA_DIAGRAM)
+	update_context
 			-- <Precursor>
 		do
-			Precursor(a_diagram)
-			if attached a_diagram as la_diagram then
-				create layout.make (la_diagram.context)
+			if attached diagram as la_diagram then
+				if attached layout as la_layout then
+					la_layout.set_cairo_context(la_diagram.context)
+				else
+					create layout.make (la_diagram.context)
+				end
 				align_text_left
 			else
 				layout := Void

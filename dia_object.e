@@ -40,6 +40,7 @@ feature -- Access
 				la_diagram.context.save_state
 				la_diagram.context.set_line_width (stroke_size)
 				la_diagram.context.set_dashes (internal_stroke_pattern, stroke_pattern_offset)
+				la_diagram.context.set_source_rgba (stroke_color.red, stroke_color.green, stroke_color.blue, stroke_color.alpha)
 				draw_stroke(la_diagram.context)
 				la_diagram.context.set_source_rgba (fill_color.red, fill_color.green, fill_color.blue, fill_color.alpha)
 				la_diagram.context.fill_preserve
@@ -154,10 +155,16 @@ feature {NONE} -- Implementation
 
 feature {DIA_DIAGRAM} -- Implementation
 
+	update_context
+			-- `diagram' has change context and `Current' have to be updated accordingly
+		do
+		end
+
 	set_diagram(a_diagram:detachable DIA_DIAGRAM)
 			-- Assign `diagram' with the value of `a_diagram'
 		do
 			diagram := a_diagram
+			update_context
 		end
 
 note

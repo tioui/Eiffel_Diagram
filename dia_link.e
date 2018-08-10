@@ -185,12 +185,12 @@ feature -- Access
 			l_gap:TUPLE[x, y:REAL_64]
 			l_end_position:TUPLE[x, y:INTEGER]
 		do
-			if attached start_marker as la_marker then
+			if attached end_marker as la_marker then
 				l_end_position := end_position
 				l_gap := gap_dimension(la_marker.gap, l_end_position, before_end_position)
 				Result := [(l_end_position.x - l_gap.x).rounded, (l_end_position.y - l_gap.y).rounded]
 			else
-				Result := start_position
+				Result := end_position
 			end
 		end
 
